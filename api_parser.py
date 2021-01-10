@@ -20,9 +20,11 @@ class StackExchange_API(Source):
   _SITE = "stackoverflow"
   _FILTER = "!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P"
 
-  def __init__(self, version=None, field=None, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
+  def __init__(self, version=None, field=None, page=1, pagesize=1, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
     self.version = version
     self.field = field
+    self.page = page
+    self.pagesize = pagesize
     self.order = order
     self.sort = sort
     self.min = min
@@ -35,32 +37,38 @@ class StackExchange_API(Source):
     api_call_string = f"{StackExchange_API._STACK_EXCHANGE_URL}{self.version}/"
 
     if self.field:
-      api_call_string =api_call_string+self.field
+      api_call_string = api_call_string + f"{self.field}?"
     
+    if self.page:
+      api_call_string = api_call_string + f"page={self.page}"
+
+    if self.pagesize:
+      api_call_string = api_call_string + f"&pagesize={self.pagesize}"
+
     if self.order:
-      api_call_string =api_call_string + f"?order={self.order}"
+      api_call_string = api_call_string + f"&order={self.order}"
 
     if self.min:
-      api_call_string =api_call_string + f"&min={self.min}"
+      api_call_string = api_call_string + f"&min={self.min}"
 
     if self.max:
-      api_call_string =api_call_string + f"&max={self.max}"
+      api_call_string = api_call_string + f"&max={self.max}"
 
     if self.sort:
-      api_call_string =api_call_string + f"&sort={self.sort}"
+      api_call_string = api_call_string + f"&sort={self.sort}"
 
     if self.tag:
-      api_call_string =api_call_string + f"&tagged={self.tag}"
+      api_call_string = api_call_string + f"&tagged={self.tag}"
 
-    api_call_string =api_call_string + f"&site={StackExchange_API._SITE}"
+    api_call_string = api_call_string + f"&site={StackExchange_API._SITE}"
 
     if self.filter:
 
-      api_call_string =api_call_string + f"&filter={self.filter}"
+      api_call_string = api_call_string + f"&filter={self.filter}"
 
     return api_call_string
 
-  def get_data(self):
+  def get_data(self, page=1, pagesize=1):
     print(self.generate_api_call_string())
     return requests.get(self.generate_api_call_string()).json()
 
