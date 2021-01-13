@@ -73,12 +73,15 @@ class StackExchange_API(Source):
     return requests.get(self.generate_api_call_string()).json()
 
 
-api = StackExchange_API(version=StackExchange_API._VERSION, field="questions", order="desc", min="10000", sort="votes", tag="python", filter="!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P" )
+api = StackExchange_API(version=StackExchange_API._VERSION, field="questions", order="desc", min="20", sort="votes", tag="python", filter="!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P" )
 questions = api.get_data()
 
 for item in questions["items"]:
+
     answers = item["answers"]
     newlist = sorted(answers, key=lambda k: k["score"], reverse=True)
+    print(json.dumps(newlist[0], indent=4, sort_keys=True))
+    print(f"question id:{item['question_id']}")
 
-print("good answers")
-print(json.dumps(newlist[0], indent=4, sort_keys=True))
+    print("good answers")
+    print(json.dumps(newlist[0], indent=4, sort_keys=True))
