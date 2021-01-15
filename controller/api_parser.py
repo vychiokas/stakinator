@@ -20,7 +20,7 @@ class StackExchange_API(Source):
   _SITE = "stackoverflow"
   _FILTER = "!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P"
 
-  def __init__(self, version=None, field=None, page=1, pagesize=1, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
+  def __init__(self, version=None, field=None, page=1, pagesize=5, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
     self.version = version
     self.field = field
     self.page = page

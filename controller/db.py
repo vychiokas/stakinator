@@ -20,6 +20,7 @@ class Comment(Base):
     __tablename__ = 'comment'
     id = Column(Integer, primary_key=True)
     question_id = Column(Integer, ForeignKey('question.id'))
+    body = Column(String)
 
 Base.metadata.create_all(engine)
 session = Session(engine)
