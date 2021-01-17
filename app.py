@@ -17,5 +17,6 @@ if __name__ == "__main__":
   
   app = StakinatorApp()
   app.create_database()
-  # app.dm.session.add(Question(body="zxcv"))
   app.dm.session.commit()
+
+  

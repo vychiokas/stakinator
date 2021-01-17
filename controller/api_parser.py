@@ -20,9 +20,10 @@ class StackExchange_API(Source):
   _SITE = "stackoverflow"
   _FILTER = "!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P"
 
-  def __init__(self, version=None, field=None, page=1, pagesize=5, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
+  def __init__(self, version=None, field=None, ids=None, page=None, pagesize=None, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
     self.version = version
     self.field = field
+    self.ids = ids
     self.page = page
     self.pagesize = pagesize
     self.order = order
@@ -32,6 +33,12 @@ class StackExchange_API(Source):
     self.tag = tag
     self.site = site
     self.filter = filter
+# /questions/{ids}/answers
+  # def fix_ids(self):
+  #   fixed_ids = ""
+  #   for item in self.ids:
+  #     fixed_ids.append(item)
+  #     fixed_ids.append(";")
 
   def generate_api_call_string(self):
     api_call_string = f"{StackExchange_API._STACK_EXCHANGE_URL}{self.version}/"
@@ -39,6 +46,9 @@ class StackExchange_API(Source):
     if self.field:
       api_call_string = api_call_string + f"{self.field}?"
     
+    if self.ids:
+      api_call_string = api_call_string.replace('{ids}', ";".join(map(str, self.ids))) 
+
     if self.page:
       api_call_string = api_call_string + f"page={self.page}"
 
@@ -75,7 +85,6 @@ class StackExchange_API(Source):
 if __name__ == "__main__":
   api = StackExchange_API(version=StackExchange_API._VERSION, field="questions", order="desc", min="20", sort="votes", tag="python", filter="!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P" )
   questions = api.get_data()
-
   for item in questions["items"]:
 
       answers = item["answers"]

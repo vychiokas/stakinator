@@ -1,0 +1,4 @@
+Add logging
+Add Ws to consume the database with questions and comments
+Add another Database Table with Author of questions and answers
+Expand the existing question and comment fields to grab more data from API
