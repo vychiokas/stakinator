@@ -20,7 +20,7 @@ class StackExchange_API(Source):
   _SITE = "stackoverflow"
   _FILTER = "!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P"
 
-  def __init__(self, version=None, field=None, ids=None, page=None, pagesize=None, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
+  def __init__(self, version=None, field=None, ids=None, page=1, pagesize=100, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
     self.version = version
     self.field = field
     self.ids = ids
@@ -78,7 +78,7 @@ class StackExchange_API(Source):
 
     return api_call_string
 
-  def get_data(self, page=1, pagesize=1):
+  def get_data(self):
     print(self.generate_api_call_string())
     return requests.get(self.generate_api_call_string()).json()
 

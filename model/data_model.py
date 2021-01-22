@@ -7,12 +7,25 @@ Base = declarative_base()
 class Question(Base):
     __tablename__ = 'question'
     id = Column(Integer, primary_key=True)
+    title = Column(String)
     body = Column(String)
-    comments = relationship("Comment", backref='question')
+    tags = Column(String)
+    user_id = Column(Integer)
 
+    # user = relationship("User", back_populates="question")
+    answers = relationship("Answer")
+    
 
-class Comment(Base):
-    __tablename__ = 'comment'
+class Answer(Base):
+    __tablename__ = 'answer'
     id = Column(Integer, primary_key=True)
     question_id = Column(Integer, ForeignKey('question.id'))
+    user_id = Column(Integer)
     body = Column(String)
+
+
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    display_name = Column(String)
+    

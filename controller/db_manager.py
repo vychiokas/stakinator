@@ -2,7 +2,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from model.data_model import Base
 
-DB_NAME = "mytestdb2"
+DB_NAME = "stakinator"
 _CONNECTION_STRING = "postgres+psycopg2://{0}:{1}@{2}/%s" % DB_NAME
 
 class DatabaseManager(object):
