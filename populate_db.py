@@ -7,10 +7,9 @@ from abc import ABC, abstractmethod
 import itertools
 
 class PopulateTable(ABC):
-  def __init__(self, number_of_api_calls=1):
+  def __init__(self):
     self.parsed_json = None
     self.dbm = DatabaseManager()
-    self.number_of_api_calls = number_of_api_calls
 
   @abstractmethod
   def set_parser(self):
@@ -36,13 +35,12 @@ class PopulateTable(ABC):
 
 
 class PopulateQuestionTable(PopulateTable):
-  def __init__(self, number_of_api_calls=1):
-    self.parsed_json = None
-    self.dbm = DatabaseManager()
-    self.number_of_api_calls = number_of_api_calls
+  def __init__(self):
+    super().__init__()
     
-  def set_parser(self, max=None):
+  def set_parser(self):
     self.api_parser = StackExchange_API(version=StackExchange_API._VERSION,
+      call_count = 2,
       field="questions",
       order="desc",
       max=max,
@@ -52,31 +50,27 @@ class PopulateQuestionTable(PopulateTable):
     
 
   def run(self):
-    max=None
-    for i in range(self.number_of_api_calls):
-      self.set_parser(max=max)
-      self.parsed_json = self.api_parser.get_data()
-      for item in self.parsed_json["items"]:
-
-        
-        try:
-          id = item["question_id"]
-          title = item["title"]
-          body = item["body_markdown"]
-          tags = item["tags"]
-          user_id = item["owner"]["user_id"]
-          question = Question(id=id, title=title, body=body, tags=tags, user_id=user_id)
-          self.dbm.session.add(question)
-          self.dbm.session.commit()
-        except:
-          pass
-      max = item["score"]
-
+    
+    self.set_parser()
+    self.parsed_json = self.api_parser.get_data()
+    for item in self.parsed_json["items"]:
+ 
+      try:
+        id = item["question_id"]
+        title = item["title"]
+        body = item["body_markdown"]
+        tags = item["tags"]
+        user_id = item["owner"]["user_id"]
+        question = Question(id=id, title=title, body=body, tags=tags, user_id=user_id)
+        self.dbm.session.add(question)
+        self.dbm.session.commit()
+      except:
+        pass
+      
 
 class PopulateAnswerTable(PopulateTable):
   def __init__(self):
-    self.dbm = DatabaseManager()
-    self.parsed_json = None
+    super().__init__()
     self.question_ids = None
 
   def set_parser(self, ids):
@@ -107,11 +101,9 @@ class PopulateAnswerTable(PopulateTable):
             pass
 
 
-
 class PopulateUserTable(PopulateTable):
   def __init__(self):
-    self.dbm = DatabaseManager()
-    self.parsed_json = None
+    super().__init__()
     self.user_ids = None
 
   def set_parser(self, ids):
@@ -125,19 +117,22 @@ class PopulateUserTable(PopulateTable):
   def run(self):
     self.get_ids([Question, Answer])
     self.split_ids_list()
-
     for ids in self.split_ids:
       self.set_parser(ids)
       self.parsed_json = self.api_parser.get_data()
       for id in ids:
         for item in self.parsed_json["items"]:
+          # pdb.set_trace()
           if item["user_id"] == id:
+            print(f"found id: {id} name: {item['display_name']}")
+
             try:
-              display_name = item["display_name"]
-              self.dbm.session.add(User(id=id, display_name=display_name))
+              self.dbm.session.add(User(id=item["user_id"], display_name=item["display_name"]))
               self.dbm.session.commit()
-            except:
-              pass
+            except Exception as e:
+              self.dbm.session.rollback()
+              print(f"Failed to insert: {id} : {item['display_name']}")
+              print(e)
 
   def get_ids(self, objects: []):
 
@@ -147,10 +142,12 @@ class PopulateUserTable(PopulateTable):
 
 
 if __name__ == "__main__":
-  popq = PopulateQuestionTable(number_of_api_calls=2)
-  popq.run()
-  popc = PopulateAnswerTable()
-  popc.run()
+  # popq = PopulateQuestionTable()
+  # popq.run()
+  # popc = PopulateAnswerTable()
+  # popc.run()
+  
+
   popu = PopulateUserTable()
   popu.run()
   
