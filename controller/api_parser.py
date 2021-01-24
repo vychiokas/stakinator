@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import requests
 import json
 import pdb
+from utils.logger import LOG
 
 class Source(ABC):
 
@@ -21,7 +22,7 @@ class StackExchange_API(Source):
   _SITE = "stackoverflow"
   _FILTER = "!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P"
 
-  def __init__(self, call_count=None, version=None, field=None, ids=None, page=1, pagesize=100, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
+  def __init__(self, call_count=1, version=None, field=None, ids=None, page=1, pagesize=100, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
     self.version = version
     self.field = field
     self.ids = ids
@@ -76,19 +77,19 @@ class StackExchange_API(Source):
     return api_call_string
 
   def get_data(self):
-    
-    if self.call_count:
+    LOG.info(f"Calling API: {self.call_count} times.")
+    if self.call_count > 1:
       data = {"items": []}
       self.max=None
       for i in range(self.call_count):
-        print(self.generate_api_call_string())
+        LOG.info(f"Calling an API with: \n {self.generate_api_call_string()}")
         parsed_data = requests.get(self.generate_api_call_string()).json()
         data["items"] = data["items"] + parsed_data["items"]
         self.max = data["items"][-1]["score"]
 
       pass
     else:
-      print(self.generate_api_call_string())
+      LOG.info(f"Calling an API with: \n {self.generate_api_call_string()}")
       data = requests.get(self.generate_api_call_string()).json()
     return data
 

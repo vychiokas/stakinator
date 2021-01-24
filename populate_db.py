@@ -5,6 +5,7 @@ from model.data_model import Question, Answer, User
 import pdb
 from abc import ABC, abstractmethod
 import itertools
+from utils.logger import LOG
 
 class PopulateTable(ABC):
   def __init__(self):
@@ -50,9 +51,10 @@ class PopulateQuestionTable(PopulateTable):
     
 
   def run(self):
-    
+    LOG.info(f"Fetching answers from API")
     self.set_parser()
     self.parsed_json = self.api_parser.get_data()
+    count = 0
     for item in self.parsed_json["items"]:
  
       try:
@@ -64,8 +66,11 @@ class PopulateQuestionTable(PopulateTable):
         question = Question(id=id, title=title, body=body, tags=tags, user_id=user_id)
         self.dbm.session.add(question)
         self.dbm.session.commit()
-      except:
-        pass
+        LOG.info(f"Question Added: id: {id}")
+      except Exception as e:
+        LOG.warning(f"An error occured inserting question id: {id} With Error: \n {e}")
+        self.dbm.session.rollback()
+      LOG.info(f"Successfully added {count} questions to database")
       
 
 class PopulateAnswerTable(PopulateTable):
@@ -83,22 +88,28 @@ class PopulateAnswerTable(PopulateTable):
       filter="!9_bDE(S2a")
 
   def run(self):
+    LOG.info(f"Fetching answers from API")
     self.get_ids([Question])
     self.split_ids_list()
-
+    count = 0
     for ids in self.split_ids:
       self.set_parser(ids)
       self.parsed_json = self.api_parser.get_data()
 
       for id in ids:
+        
         answers = [answer for answer in self.parsed_json["items"] if answer["question_id"] == id]
         sorted_answers = sorted(answers, key=lambda k: k["score"], reverse=True)
         for item in sorted_answers[:5]:
           try:
             self.dbm.session.add(Answer(question_id=id, body=item["body_markdown"], user_id=item["owner"]["user_id"]))
             self.dbm.session.commit()
-          except:
-            pass
+            count+=1
+            LOG.info(f"Answer Added: id: {id}")
+          except Exception as e:
+            LOG.warning(f"An error occured inserting answer id: {id} With Error: \n {e}")
+            self.dbm.session.rollback()
+      LOG.info(f"Successfully added {count} answers to database")
 
 
 class PopulateUserTable(PopulateTable):
@@ -115,8 +126,10 @@ class PopulateUserTable(PopulateTable):
       filter="default")
 
   def run(self):
+    LOG.info(f"Fetching Users from API")
     self.get_ids([Question, Answer])
     self.split_ids_list()
+    count = 0
     for ids in self.split_ids:
       self.set_parser(ids)
       self.parsed_json = self.api_parser.get_data()
@@ -131,23 +144,24 @@ class PopulateUserTable(PopulateTable):
               self.dbm.session.commit()
             except Exception as e:
               self.dbm.session.rollback()
-              print(f"Failed to insert: {id} : {item['display_name']}")
-              print(e)
+              LOG.warning(f"An error occured inserting user id: {id} With Error: \n {e}")
+            break
+            
+      LOG.info(f"Successfully added {count} users to database")
 
   def get_ids(self, objects: []):
 
     all_objects = [self.dbm.session.query(obj).all() for obj in objects]
     all_objects = list(itertools.chain.from_iterable(all_objects))
     self.all_ids = [obj.user_id for obj in all_objects]
-
+    self.all_ids = list(set(self.all_ids))
 
 if __name__ == "__main__":
-  # popq = PopulateQuestionTable()
-  # popq.run()
-  # popc = PopulateAnswerTable()
-  # popc.run()
-  
 
+  popq = PopulateQuestionTable()
+  popq.run()
+  popc = PopulateAnswerTable()
+  popc.run()
   popu = PopulateUserTable()
   popu.run()
   

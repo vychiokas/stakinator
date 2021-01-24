@@ -11,7 +11,7 @@ class DatabaseManager(object):
     def __new__(cls):
         if DatabaseManager.__instance is None:
             DatabaseManager.__instance = object.__new__(cls)
-            DatabaseManager.__instance.engine = create_engine(_CONNECTION_STRING.format("postgres", "example", "172.17.0.1:5433"), echo=True)
+            DatabaseManager.__instance.engine = create_engine(_CONNECTION_STRING.format("postgres", "example", "172.17.0.1:5433"), echo=False)
             
             # Create a configured "Session" class
             sm = sessionmaker(bind=DatabaseManager.__instance.engine, autoflush=True, autocommit=False)
