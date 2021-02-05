@@ -54,7 +54,8 @@ class PopulateQuestionTable(PopulateTable):
     LOG.info(f"Fetching answers from API")
     self.set_parser()
     self.parsed_json = self.api_parser.get_data()
-    count = 0
+    count_success = 0
+    count_fail = 0
     for item in self.parsed_json["items"]:
  
       try:
@@ -67,11 +68,13 @@ class PopulateQuestionTable(PopulateTable):
         self.dbm.session.add(question)
         self.dbm.session.commit()
         LOG.info(f"Question Added: id: {id}")
+        count_success+= 1
       except Exception as e:
         LOG.warning(f"An error occured inserting question id: {id} With Error: \n {e}")
         self.dbm.session.rollback()
-      LOG.info(f"Successfully added {count} questions to database")
-      
+        count_fail+= 1
+    LOG.info(f"Successfully added {count_success} questions to database")
+    LOG.info(f"Issues Occured with {count_fail} questions")
 
 class PopulateAnswerTable(PopulateTable):
   def __init__(self):
@@ -91,7 +94,8 @@ class PopulateAnswerTable(PopulateTable):
     LOG.info(f"Fetching answers from API")
     self.get_ids([Question])
     self.split_ids_list()
-    count = 0
+    count_success = 0
+    count_fail = 0
     for ids in self.split_ids:
       self.set_parser(ids)
       self.parsed_json = self.api_parser.get_data()
@@ -104,12 +108,14 @@ class PopulateAnswerTable(PopulateTable):
           try:
             self.dbm.session.add(Answer(question_id=id, body=item["body_markdown"], user_id=item["owner"]["user_id"]))
             self.dbm.session.commit()
-            count+=1
+            count_success+=1
             LOG.info(f"Answer Added: id: {id}")
           except Exception as e:
             LOG.warning(f"An error occured inserting answer id: {id} With Error: \n {e}")
             self.dbm.session.rollback()
-      LOG.info(f"Successfully added {count} answers to database")
+            count_fail+= 1
+    LOG.info(f"Successfully added {count_success} answers to database")
+    LOG.info(f"Issues Occured with {count_fail} answers")
 
 
 class PopulateUserTable(PopulateTable):
@@ -129,7 +135,8 @@ class PopulateUserTable(PopulateTable):
     LOG.info(f"Fetching Users from API")
     self.get_ids([Question, Answer])
     self.split_ids_list()
-    count = 0
+    count_success = 0
+    count_fail = 0
     for ids in self.split_ids:
       self.set_parser(ids)
       self.parsed_json = self.api_parser.get_data()
@@ -137,17 +144,19 @@ class PopulateUserTable(PopulateTable):
         for item in self.parsed_json["items"]:
           # pdb.set_trace()
           if item["user_id"] == id:
-            print(f"found id: {id} name: {item['display_name']}")
-
             try:
               self.dbm.session.add(User(id=item["user_id"], display_name=item["display_name"]))
               self.dbm.session.commit()
+              count_success+= 1
+              LOG.info(f"User Added: id: {id}")
             except Exception as e:
               self.dbm.session.rollback()
               LOG.warning(f"An error occured inserting user id: {id} With Error: \n {e}")
+              count_fail+=1
             break
             
-      LOG.info(f"Successfully added {count} users to database")
+    LOG.info(f"Successfully added {count_success} users to database")
+    LOG.info(f"Issues Occured with {count_fail} users")
 
   def get_ids(self, objects: []):
 
