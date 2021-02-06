@@ -25,7 +25,7 @@ def show_single_user(user_id):
     user = dbm.session.query(User).filter(User.id == user_id).first()
     if user:
         response = {"User": user.serialize()}
-        return response
+        return response, 200
     else:
         reponse = {"message": f"user with id: {user_id} not found"}
         return reponse, 404
