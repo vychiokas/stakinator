@@ -1,11 +1,11 @@
 
-from controller.api_parser import StackExchange_API
-from controller.db_manager import DatabaseManager
-from model.data_model import Question, Answer, User
+from stakinator.controller.api_parser import StackExchange_API
+from stakinator.controller.db_manager import DatabaseManager
+from stakinator.model.data_model import Question, Answer, User
 import pdb
 from abc import ABC, abstractmethod
 import itertools
-from utils.logger import LOG
+from stakinator.utils.logger import LOG
 
 class PopulateTable(ABC):
   def __init__(self):
@@ -142,7 +142,7 @@ class PopulateUserTable(PopulateTable):
       self.parsed_json = self.api_parser.get_data()
       for id in ids:
         for item in self.parsed_json["items"]:
-          # pdb.set_trace()
+
           if item["user_id"] == id:
             try:
               self.dbm.session.add(User(id=item["user_id"], display_name=item["display_name"]))
@@ -167,10 +167,10 @@ class PopulateUserTable(PopulateTable):
 
 if __name__ == "__main__":
 
-  popq = PopulateQuestionTable()
-  popq.run()
-  popc = PopulateAnswerTable()
-  popc.run()
+  # popq = PopulateQuestionTable()
+  # popq.run()
+  # popc = PopulateAnswerTable()
+  # popc.run()
   popu = PopulateUserTable()
   popu.run()
   

@@ -1,9 +1,9 @@
-from controller.db_manager import DatabaseManager
+from stakinator.controller.db_manager import DatabaseManager
 
 from importlib import import_module
-from model.data_model import Question
+from stakinator.model.data_model import Question
 import argparse
-from controller.populate_db import PopulateAnswerTable, PopulateQuestionTable, PopulateUserTable
+from stakinator.controller.populate_db import PopulateAnswerTable, PopulateQuestionTable, PopulateUserTable
 
 class StakinatorApp():
   def __init__(self):

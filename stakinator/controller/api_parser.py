@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 import requests
 import json
 import pdb
-from utils.logger import LOG
+from stakinator.utils.logger import LOG
+# from utils.singleton import SingletonMeta
 
 class Source(ABC):
 
@@ -21,6 +22,8 @@ class StackExchange_API(Source):
   _TAGGED = "python"
   _SITE = "stackoverflow"
   _FILTER = "!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P"
+  _NUM_CALLED = 0
+  _REMAINING_CALLS = None
 
   def __init__(self, call_count=1, version=None, field=None, ids=None, page=1, pagesize=100, order=None, sort=None, min=None, max=None, tag=None, site=_SITE, filter=None):
     self.version = version
@@ -84,6 +87,10 @@ class StackExchange_API(Source):
       for i in range(self.call_count):
         LOG.info(f"Calling an API with: \n {self.generate_api_call_string()}")
         parsed_data = requests.get(self.generate_api_call_string()).json()
+        StackExchange_API._NUM_CALLED+= 1
+        LOG.info(f"API now called {StackExchange_API._NUM_CALLED} times")
+        StackExchange_API._REMAINING_CALLS = parsed_data["quota_remaining"]
+        LOG.info(f"API calls left: {StackExchange_API._REMAINING_CALLS}")
         data["items"] = data["items"] + parsed_data["items"]
         self.max = data["items"][-1]["score"]
 
@@ -91,7 +98,12 @@ class StackExchange_API(Source):
     else:
       LOG.info(f"Calling an API with: \n {self.generate_api_call_string()}")
       data = requests.get(self.generate_api_call_string()).json()
+      StackExchange_API._NUM_CALLED+= 1
+      LOG.info(f"API now called {StackExchange_API._NUM_CALLED} times")
+      StackExchange_API._REMAINING_CALLS = data["quota_remaining"]
+      LOG.info(f"API calls left: {StackExchange_API._REMAINING_CALLS}")
     return data
+
 
 if __name__ == "__main__":
   api = StackExchange_API(version=StackExchange_API._VERSION, field="questions", order="desc", min="20", sort="votes", tag="python", filter="!*SU8CGYZitCB.D*(BDVIfh2KKqQ)7jqYCBJzAPqv1FF5P6ymFq8a9Bc8edtQc*PqJ)28g05P" )

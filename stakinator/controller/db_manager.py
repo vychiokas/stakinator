@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from model.data_model import Base
+from stakinator.model.data_model import Base
 
 DB_NAME = "stakinator"
 _CONNECTION_STRING = "postgres+psycopg2://{0}:{1}@{2}/%s" % DB_NAME
